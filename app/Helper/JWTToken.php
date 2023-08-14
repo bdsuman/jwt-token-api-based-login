@@ -5,6 +5,7 @@ namespace App\Helper;
 use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Illuminate\Http\Request;
 
 class JWTToken
 {
@@ -14,7 +15,7 @@ class JWTToken
         $payload=[
             'iss'=>'laravel-token',
             'iat'=>time(),
-            'exp'=>time()+60*60,
+            'exp'=>time()+60*60*30,
             'userEmail'=>$userEmail,
             'userID'=>$userID
         ];
@@ -53,4 +54,14 @@ class JWTToken
         }
     }
 
+    public static function GetEmail($token){
+
+        $result=JWTToken::VerifyToken($token);
+        if($result=="unauthorized"){
+            return '';
+        }else{
+            return $result->userEmail;
+        }
+
+    }
 }
