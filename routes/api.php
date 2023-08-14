@@ -5,7 +5,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserController;
 
 
-// Web API Routes
+// API Routes
 Route::post('/user-registration',[UserController::class,'UserRegistration']);
 Route::post('/send-otp',[UserController::class,'SendOTPCode']);
 Route::post('/verify-otp',[UserController::class,'VerifyOTP']);
@@ -15,7 +15,6 @@ Route::post('/forgot-password',[UserController::class,'SendPassword']);
 
 Route::group(['prefix' => '', 'middleware' => ['jwt-auth']], function() {
     Route::get('/user-profile',[UserController::class,'UserProfile']);
-    Route::post('/reset-password',[UserController::class,'ResetPassword']);
     Route::post('/user-update',[UserController::class,'UpdateProfile']);
     
     // Customer API

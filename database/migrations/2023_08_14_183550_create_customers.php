@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->string('name',50);
             $table->string('email',150)->nullable();
-            $table->string('mobile',50)->unique();
+            $table->string('mobile',50)->nullable();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')
                 ->cascadeOnUpdate()->restrictOnDelete();

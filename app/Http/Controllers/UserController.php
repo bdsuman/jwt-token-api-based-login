@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
-    function UserRegistration(Request $request){
+    public function UserRegistration(Request $request){
         try {
             User::create([
                 'name' => $request->input('name'),
@@ -29,14 +29,14 @@ class UserController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'failed',
-                // 'message' => 'User Registration Failed'
-                'message' => $e->getMessage()
+                'message' => 'User Registration Failed',
+                // 'message' => $e->getMessage()
             ],200);
 
         }
     }
 
-    function UserLogin(Request $request){
+   public function UserLogin(Request $request){
         $email = $request->input('email');
         $password = $request->input('password');
 
@@ -73,7 +73,7 @@ class UserController extends Controller
 
     }
 
-    function SendOTPCode(Request $request){
+   public function SendOTPCode(Request $request){
 
         $email=$request->input('email');
         $otp=rand(1000,9999);
@@ -98,7 +98,8 @@ class UserController extends Controller
         }
     }
 
-    function VerifyOTP(Request $request){
+   public function VerifyOTP(Request $request){
+
         $email=$request->input('email');
         $otp=$request->input('otp');
         $count=User::where('email','=',$email)
@@ -108,12 +109,10 @@ class UserController extends Controller
             // Database OTP Update
             User::where('email','=',$email)->update(['otp'=>'0','email_verified_at'=>Carbon::now()]);
 
-            // Pass Reset Token Issue
-            $token=JWTToken::CreateTokenForSetPassword($request->input('email'));
+           
             return response()->json([
                 'status' => 'success',
-                'message' => 'OTP Verification Successful',
-                'token' => $token
+                'message' => 'Email Verification Successful'
             ],200);
 
         }
@@ -124,7 +123,7 @@ class UserController extends Controller
             ],200);
         }
     }
-    function SendPassword(Request $request){
+   public function SendPassword(Request $request){
 
         $email=$request->input('email');
         $temp_password=$this->generateUniqueString();
@@ -150,9 +149,9 @@ class UserController extends Controller
 
     }
 
-    function UserProfile(Request $request){
+   public function UserProfile(Request $request){
        
-        $email=JWTToken::GetEmail($request->bearerToken());;
+        $email=JWTToken::GetEmail($request->bearerToken());
         $user=User::where('email','=',$email)->first();
         return response()->json([
             'status' => 'success',
@@ -160,7 +159,7 @@ class UserController extends Controller
         ],200);
     }
 
-    function UpdateProfile(Request $request){
+   public function UpdateProfile(Request $request){
         try{
             $email=JWTToken::GetEmail($request->bearerToken());;
             $name=$request->input('name');
@@ -181,7 +180,7 @@ class UserController extends Controller
             ],200);
         }
     }
-    function generateUniqueString($length = 6) {
+   public function generateUniqueString($length = 6) {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $string = '';
         

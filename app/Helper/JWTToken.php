@@ -22,21 +22,6 @@ class JWTToken
        return JWT::encode($payload,$key,'HS256');
     }
 
-
-    public static function CreateTokenForSetPassword($userEmail):string{
-        $key =env('JWT_KEY');
-        $payload=[
-            'iss'=>'laravel-token',
-            'iat'=>time(),
-            'exp'=>time()+60*20,
-            'userEmail'=>$userEmail,
-            'userID'=>'0'
-        ];
-        return JWT::encode($payload,$key,'HS256');
-    }
-
-
-
     public static function VerifyToken($token):string|object
     {
         try {
@@ -61,6 +46,16 @@ class JWTToken
             return '';
         }else{
             return $result->userEmail;
+        }
+
+    }
+    public static function GetID($token){
+
+        $result=JWTToken::VerifyToken($token);
+        if($result=="unauthorized"){
+            return '';
+        }else{
+            return $result->userID;
         }
 
     }
