@@ -7,6 +7,7 @@ use App\Mail\OTPMail;
 use App\Helper\JWTToken;
 use App\Mail\PasswordMail;
 use Illuminate\Http\Request;
+use App\Http\Resources\UserDetails;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
@@ -148,15 +149,45 @@ class UserController extends Controller
         }
 
     }
+    function ResetPassword(Request $request){
+        try{
+            $email=JWTToken::GetEmail($request->bearerToken());
+            $old_password=$request->input('old_password');
+            $password=$request->input('password');
+            $user = User::where('email', '=', $email)->where('email_verified_at','!=',NULL)->where('otp',0)->first();
+            if (!$user) {
+                return response()->json([
+                    'status'=>'failed', 
+                    'message' => 'unauthorized'
+                ]);
+            }
 
+            if (!Hash::check($old_password, $user->password)) {
+                return response()->json([
+                    'status'=>'failed',
+                     'message' => 'unauthorized'
+                ]);
+            }
+     
+            User::where('email','=',$email)->update(['password'=>Hash::make($password)]);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Request Successful',
+            ],200);
+
+        }catch (Exception $exception){
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Something Went Wrong',
+            ],200);
+        }
+    }
    public function UserProfile(Request $request){
        
         $email=JWTToken::GetEmail($request->bearerToken());
         $user=User::where('email','=',$email)->first();
-        return response()->json([
-            'status' => 'success',
-            'data' => $user
-        ],200);
+        return new UserDetails($user);
+        
     }
 
    public function UpdateProfile(Request $request){

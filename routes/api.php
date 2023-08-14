@@ -16,6 +16,7 @@ Route::post('/forgot-password',[UserController::class,'SendPassword']);
 Route::group(['prefix' => '', 'middleware' => ['jwt-auth']], function() {
     Route::get('/user-profile',[UserController::class,'UserProfile']);
     Route::post('/user-update',[UserController::class,'UpdateProfile']);
+    Route::post('/reset-password',[UserController::class,'ResetPassword']);
     
     // Customer API
     Route::post("/create-customer",[CustomerController::class,'CustomerCreate']);
