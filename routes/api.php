@@ -27,3 +27,12 @@ Route::group(['prefix' => '', 'middleware' => ['jwt-auth']], function() {
 
 
 });
+
+Route::fallback(function() {
+    return response()->json([
+        'data' => [],
+        'success' => false,
+        'status' => 404,
+        'message' => 'Invalid Route'
+    ]);
+});

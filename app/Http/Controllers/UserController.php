@@ -21,19 +21,9 @@ class UserController extends Controller
                 'mobile' => $request->input('mobile'),
                 'password' => Hash::make($request->input('password')),
             ]);
-           
-            return response()->json([
-                'status' => 'success',
-                'message' => 'User Registration Succesfull'
-            ],200);
-
+           return $this->success('User Registration Succesfull');
         } catch (Exception $e) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'User Registration Failed',
-                // 'message' => $e->getMessage()
-            ],200);
-
+            return $this->failed('User Registration Failed');
         }
     }
 
@@ -43,33 +33,24 @@ class UserController extends Controller
 
         $user = User::where('email', '=', $email)->where('email_verified_at','!=',NULL)->where('otp',0)->first();
             if (!$user) {
-                return response()->json([
-                    'status'=>'failed', 
-                    'message' => 'unauthorized'
-                ]);
+                return $this->failed('User Not Found.');
             }
             if (!Hash::check($password, $user->password)) {
-                return response()->json([
-                    'status'=>'failed',
-                     'message' => 'unauthorized'
-                ]);
+                return $this->failed('Password Not Match.');
             }
          
        if($user){
            // User Login-> JWT Token Issue
            $token=JWTToken::CreateToken($email,$user->id);
+          
            return response()->json([
                'status' => 'success',
                'message' => 'User Login Successful',
-               'token'=>$token
+               'Bearer Token'=>$token
            ],200);
        }
        else{
-           return response()->json([
-               'status' => 'failed',
-               'message' => 'unauthorized'
-           ],200);
-
+         return $this->failed('unauthorized');
        }
 
     }
@@ -81,21 +62,19 @@ class UserController extends Controller
         $count=User::where('email','=',$email)->count();
 
         if($count==1){
-            // OTP Email Address
-            Mail::to($email)->send(new OTPMail($otp));
-            // OTO Code Table Update
-            User::where('email','=',$email)->update(['otp'=>$otp]);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => '4 Digit OTP Code has been send to your email !'
-            ],200);
+            try{
+                 // OTP Email Address
+                Mail::to($email)->send(new OTPMail($otp));
+                // OTO Code Table Update
+                User::where('email','=',$email)->update(['otp'=>$otp]);
+                return $this->success('4 Digit OTP Code has been send to your email !');
+            }catch (Exception $exception){
+                return $this->failed('Something Went Wrong'); 
+            }
+           
         }
         else{
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'unauthorized'
-            ]);
+            return $this->failed('unauthorized');
         }
     }
 
@@ -110,18 +89,11 @@ class UserController extends Controller
             // Database OTP Update
             User::where('email','=',$email)->update(['otp'=>'0','email_verified_at'=>Carbon::now()]);
 
+            return $this->success('Email Verification Successful');
            
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Email Verification Successful'
-            ],200);
-
         }
         else{
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'unauthorized'
-            ],200);
+            return $this->failed('unauthorized');
         }
     }
    public function SendPassword(Request $request){
@@ -131,55 +103,42 @@ class UserController extends Controller
         $count=User::where('email','=',$email)->count();
 
         if($count==1){
-            // Password Send Email Address
-            Mail::to($email)->send(new PasswordMail($temp_password));
-            // Password Update
-            User::where('email','=',$email)->update(['password'=>Hash::make($temp_password)]);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'New Password Code has been send to your email !'
-            ],200);
+            try{
+                // Password Send Email Address
+                Mail::to($email)->send(new PasswordMail($temp_password));
+                // Password Update
+                User::where('email','=',$email)->update(['password'=>Hash::make($temp_password)]);
+                return $this->success('New Password Code has been send to your email !');
+            }catch (Exception $exception){
+                return $this->failed('Something Went Wrong'); 
+            }
         }
         else{
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'unauthorized'
-            ]);
+            return $this->failed('unauthorized');
         }
 
     }
-    function ResetPassword(Request $request){
+    
+    public function ResetPassword(Request $request){
         try{
             $email=JWTToken::GetEmail($request->bearerToken());
             $old_password=$request->input('old_password');
             $password=$request->input('password');
             $user = User::where('email', '=', $email)->where('email_verified_at','!=',NULL)->where('otp',0)->first();
             if (!$user) {
-                return response()->json([
-                    'status'=>'failed', 
-                    'message' => 'unauthorized'
-                ]);
+                return $this->failed('User Not Found.');
             }
 
             if (!Hash::check($old_password, $user->password)) {
-                return response()->json([
-                    'status'=>'failed',
-                     'message' => 'unauthorized'
-                ]);
+                return $this->failed('Password Not Match.');
             }
      
             User::where('email','=',$email)->update(['password'=>Hash::make($password)]);
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Request Successful',
-            ],200);
+            return $this->success('Password Reset Successful.');
 
         }catch (Exception $exception){
-            return response()->json([
-                'status' => 'fail',
-                'message' => 'Something Went Wrong',
-            ],200);
+            return $this->failed('Something Went Wrong'); 
         }
     }
    public function UserProfile(Request $request){
@@ -199,16 +158,9 @@ class UserController extends Controller
                 'name'=>$name,
                 'mobile'=>$mobile,
             ]);
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Update Request Successful',
-            ],200);
-
+            return $this->success('Update Request Successful');
         }catch (Exception $exception){
-            return response()->json([
-                'status' => 'fail',
-                'message' => 'Something Went Wrong',
-            ],200);
+            return $this->failed('Something Went Wrong'); 
         }
     }
    public function generateUniqueString($length = 6) {

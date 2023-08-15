@@ -28,32 +28,13 @@ class CustomerController extends Controller
                 'mobile'=>$request->input('mobile'),
                 'user_id'=>$user_id
             ]);
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Customer Registration Succesfull'
-            ],200);
+            return $this->success('Customer Registration Succesfull');
+          
         }catch(\Exception $e){
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'Customer Registration Failed',
-            ],200);
+            return $this->failed('Customer Registration Failed'); 
+           
         }
     }
-
-
-   
-
-
-   public function CustomerDelete(Request $request){
-        $customer_id=$request->input('id');
-        $user_id=JWTToken::GetID($request->bearerToken());
-       Customer::where('id',$customer_id)->where('user_id',$user_id)->delete();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Customer Delete Succesfull'
-        ],200);
-    }
-
 
    public function CustomerByID(Request $request){
         $customer_id=$request->input('id');
@@ -71,10 +52,16 @@ class CustomerController extends Controller
             'email'=>$request->input('email'),
             'mobile'=>$request->input('mobile'),
         ]);
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Customer Update Succesfull'
-        ],200);
+        return $this->success('Customer Update Succesfull');
+       
+    }
+
+    public function CustomerDelete(Request $request){
+        $customer_id=$request->input('id');
+        $user_id=JWTToken::GetID($request->bearerToken());
+       Customer::where('id',$customer_id)->where('user_id',$user_id)->delete();
+       return $this->success('Customer Delete Succesfull');
+       
     }
 
 
