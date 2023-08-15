@@ -11,7 +11,6 @@ class UserDetails extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user_id'=>$this->user_id,
             'name' => $this->name,
             'email' => $this->email??'',
             'email_verified_at' => empty($this->email_verified_at)?'':date('d M, Y H:i:s',strtotime($this->email_verified_at)),

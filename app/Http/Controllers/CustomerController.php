@@ -14,7 +14,7 @@ class CustomerController extends Controller
    public function CustomerList(Request $request){
 
         $user_id=JWTToken::GetID($request->bearerToken());
-        $customers=Customer::where('user_id',$user_id)->get();
+        $customers=Customer::where('user_id',$user_id)->paginate(10);
         return new CustomerCollection($customers);
     }   
 
@@ -39,6 +39,14 @@ class CustomerController extends Controller
    public function CustomerByID(Request $request){
         $customer_id=$request->input('id');
         $user_id=JWTToken::GetID($request->bearerToken());
+        try{
+            $customer_user_id= Customer::findOrFail($customer_id)->user_id;
+            if($customer_user_id!==$user_id){
+                return $this->failed('Customer Not Yours.');
+            }
+        }catch (\Exception $exception){
+            return $this->failed('Something Went Wrong'); 
+        }
         $customer = Customer::where('id',$customer_id)->where('user_id',$user_id)->first();
         return new CustomerDetails($customer);
     }
@@ -47,6 +55,15 @@ class CustomerController extends Controller
     public function CustomerUpdate(Request $request){
         $customer_id=$request->input('id');
         $user_id=JWTToken::GetID($request->bearerToken());
+        try{
+            $customer_user_id= Customer::findOrFail($customer_id)->user_id;
+            if($customer_user_id!==$user_id){
+                return $this->failed('Customer Not Yours.');
+            }
+        }catch (\Exception $exception){
+            return $this->failed('Something Went Wrong'); 
+        }
+        
        Customer::where('id',$customer_id)->where('user_id',$user_id)->update([
             'name'=>$request->input('name'),
             'email'=>$request->input('email'),
@@ -59,6 +76,15 @@ class CustomerController extends Controller
     public function CustomerDelete(Request $request){
         $customer_id=$request->input('id');
         $user_id=JWTToken::GetID($request->bearerToken());
+        try{
+            $customer_user_id= Customer::findOrFail($customer_id)->user_id;
+            if($customer_user_id!==$user_id){
+                return $this->failed('Customer Not Yours.');
+            }
+        }catch (\Exception $exception){
+            return $this->failed('Something Went Wrong'); 
+        }
+       
        Customer::where('id',$customer_id)->where('user_id',$user_id)->delete();
        return $this->success('Customer Delete Succesfull');
        
